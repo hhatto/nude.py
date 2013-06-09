@@ -2,9 +2,8 @@ all:
 	@echo "make clean"
 
 clean:
-	rm -rf build dist *.egg-info */__pycache__
-	rm */*.pyc
+	rm -rf build dist *.egg-info */__pycache__ */*.pyc
 
 pypireg:
-	${PYTHON} setup.py register
-	${PYTHON} setup.py sdist upload
+	python setup.py register
+	python setup.py sdist upload
