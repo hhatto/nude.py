@@ -37,7 +37,7 @@ Usage
 
     n = Nude('./nude.rb/spec/images/damita.jpg')
     n.parse()
-    print "damita :", n.result, n.inspect()
+    print("damita :", n.result, n.inspect())
 
 see examples_ .
 
