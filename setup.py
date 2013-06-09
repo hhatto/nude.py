@@ -2,11 +2,11 @@ try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
-import nude
+from nude import __version__
 
 
 setup(name='nudepy',
-      version=nude.__version__,
+      version=__version__,
       description="Nudity detection with Python. Port of nude.js to Python.",
       long_description=open('README.rst').read(),
       author='Hideo Hattori',
