@@ -178,7 +178,7 @@ class Nude(object):
         self.skin_regions.reverse()
 
         # count total skin pixels
-        total_skin = float(sum([len(skin_ragion) for skin_ragion in self.skin_regions]))
+        total_skin = float(sum([len(skin_region) for skin_region in self.skin_regions]))
 
         # check if there are more than 15% skin pixel in the image
         if total_skin / self.total_pixels * 100 < 15:
