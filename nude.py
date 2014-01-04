@@ -1,6 +1,13 @@
-import sys
+#!/usr/bin/env python
+# encoding: utf-8
+
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+
 import copy
+import sys
 from collections import namedtuple
+
 try:
     import Image
 except ImportError:
@@ -285,3 +292,17 @@ class Nude(object):
             h += 360
 
         return [h, 1.0 - (3.0 * (_min / _sum)), (1.0 / 3.0) * _max]
+
+##############################################################################
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: {0} <image>".format(sys.argv[0]))
+        sys.exit(1)
+    # else
+    fname = sys.argv[1]
+    print(is_nude(fname))
+
+    n = Nude(fname)
+    n.parse()
+    print("{0}: {1} {2}".format(fname, n.result, n.inspect()))
