@@ -27,6 +27,13 @@ Requirements
 
 Usage
 -----
+via command-line
+
+.. code-block:: sh
+
+    $ nudepy IMAGE_FILE
+
+via Python Module
 
 .. code-block:: python
 

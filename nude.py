@@ -295,10 +295,11 @@ class Nude(object):
 
 ##############################################################################
 
-if __name__ == "__main__":
+
+def main():
     if len(sys.argv) < 2:
         print("Usage: {0} <image>".format(sys.argv[0]))
-        sys.exit(1)
+        return 1
     # else
     fname = sys.argv[1]
     print(is_nude(fname))
@@ -306,3 +307,7 @@ if __name__ == "__main__":
     n = Nude(fname)
     n.parse()
     print("{0}: {1} {2}".format(fname, n.result, n.inspect()))
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
