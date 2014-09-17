@@ -30,13 +30,6 @@ class Nude(object):
             self.image = path_or_io
         else:
             self.image = Image.open(path_or_io)
-        basewidth = 1000
-        if self.image.size[0] > basewidth:
-            wpercent = (basewidth/float(self.image.size[0]))
-            hsize = int((float(self.image.size[1])*float(wpercent)))
-            fname = self.image.filename
-            self.image = self.image.resize((basewidth, hsize), Image.ANTIALIAS)
-            self.image.filename = fname
         self.skin_map = []
         self.skin_regions = []
         self.detected_regions = []
@@ -47,6 +40,41 @@ class Nude(object):
         self.width, self.height = self.image.size
         self.total_pixels = self.width * self.height
 
+    def resize(self, maxwidth=1000, maxheight=1000):
+        """
+        Will resize the image proportionately based on maxwidth and maxheight.
+        
+        Return value is 0 if no change was made, 1 if the image was changed
+        based on width, 2 if the image was changed based on height, 3 if it
+        was changed on both
+        
+        maxwidth - The max size for the width of the picture
+        maxheight - The max size for the height of the picture
+        Both can be set to False to ignore
+        """
+        ret = 0
+        if maxwidth:
+            if self.width > maxwidth:
+                wpercent = (maxwidth/float(self.width))
+                hsize = int((float(self.height)*float(wpercent)))
+                fname = self.image.filename
+                self.image = self.image.resize((maxwidth, hsize), Image.ANTIALIAS)
+                self.image.filename = fname
+                self.width, self.height = self.image.size
+                self.total_pixels = self.width * self.height
+                ret += 1
+        if maxheight:
+            if self.height > maxheight:
+                hpercent = (maxheight/float(self.height))
+                wsize = int((float(self.width)*float(hpercent)))
+                fname = self.image.filename
+                self.image = self.image.resize((wsize, maxheight), Image.ANTIALIAS)
+                self.image.filename = fname
+                self.width, self.height = self.image.size
+                self.total_pixels = self.width * self.height
+                ret += 2
+        return ret
+        
     def parse(self):
         if self.result:
             return self
@@ -308,20 +336,23 @@ def main():
     parser = argparse.ArgumentParser(description='Detect nudity in images.')
     parser.add_argument('files', metavar='image', nargs='+',
                         help='Images you wish to test')
+    parser.add_argument('-r', '--resize', action='store_true', help='Reduce image size to increase speed of scanning')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
 
     if args.verbose:
-        print("#FileName, Result, Time(sec), Message")
+        print("#File Name, Result, Scan Time(sec), Image size, Message")
     for fname in args.files:
         if os.path.isfile(fname):    
             start = time.time()
             n = Nude(fname)
+            if args.resize:
+                n.resize(maxheight=800, maxwidth=600)
             n.parse()
             totaltime = int(math.ceil(time.time() - start))
             if args.verbose:
-                msg = n.message
-                print(fname, n.result, totaltime, msg, sep=', ')
+                size = str(n.height) + 'x' + str(n.width)
+                print(fname, n.result, totaltime, size, n.message, sep=', ')
             else:
                 print(fname, n.result, sep = "\t")
         else:
