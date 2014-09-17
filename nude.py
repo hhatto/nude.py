@@ -17,11 +17,9 @@ except ImportError:
         sys.stderr.write("Please install PIL or Pillow\n")
         sys.exit(1)
 
-
 def is_nude(path_or_io):
     nude = Nude(path_or_io)
     return nude.parse().result
-
 
 class Nude(object):
 
@@ -37,7 +35,7 @@ class Nude(object):
             wpercent = (basewidth/float(self.image.size[0]))
             hsize = int((float(self.image.size[1])*float(wpercent)))
             fname = self.image.filename
-            self.image = self.image.resize((basewidth,hsize), Image.ANTIALIAS)
+            self.image = self.image.resize((basewidth, hsize), Image.ANTIALIAS)
             self.image.filename = fname
         self.skin_map = []
         self.skin_regions = []
@@ -197,7 +195,7 @@ class Nude(object):
         # check if there are more than 15% skin pixel in the image
         if total_skin / self.total_pixels * 100 < 15:
             # if the percentage lower than 15, it's not nude!
-            self.message = "Total skin parcentage lower than 15 (%.3f%%)" % (total_skin / self.total_pixels * 100)
+            self.message = "Total skin percentage lower than 15 (%.3f%%)" % (total_skin / self.total_pixels * 100)
             self.result = False
             return self.result
 
@@ -262,7 +260,7 @@ class Nude(object):
             s > 0.23 and \
             s < 0.68
 
-        # ycc doesnt work
+        # ycc doesn't work
         return rgb_classifier or norm_rgb_classifier or hsv_classifier
 
     def _to_normalized_rgb(self, r, g, b):
@@ -301,7 +299,6 @@ class Nude(object):
         return [h, 1.0 - (3.0 * (_min / _sum)), (1.0 / 3.0) * _max]
 
 ##############################################################################
-
 
 def main():
     import argparse
