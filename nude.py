@@ -32,6 +32,13 @@ class Nude(object):
             self.image = path_or_io
         else:
             self.image = Image.open(path_or_io)
+        basewidth = 1000
+        if self.image.size[0] > basewidth:
+            wpercent = (basewidth/float(self.image.size[0]))
+            hsize = int((float(self.image.size[1])*float(wpercent)))
+            fname = self.image.filename
+            self.image = self.image.resize((basewidth,hsize), Image.ANTIALIAS)
+            self.image.filename = fname
         self.skin_map = []
         self.skin_regions = []
         self.detected_regions = []
