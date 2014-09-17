@@ -304,16 +304,31 @@ class Nude(object):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: {0} <image>".format(sys.argv[0]))
-        return 1
-    # else
-    fname = sys.argv[1]
-    print(is_nude(fname))
+    import argparse
+    import os
+    import time
+    import math
+    parser = argparse.ArgumentParser(description='Detect nudity in images.')
+    parser.add_argument('files', metavar='image', nargs='+',
+                        help='Images you wish to test')
+    parser.add_argument('-v', '--verbose', action='store_true')
+    args = parser.parse_args()
 
-    n = Nude(fname)
-    n.parse()
-    print("{0}: {1} {2}".format(fname, n.result, n.inspect()))
+    if args.verbose:
+        print("#FileName, Result, Time(sec), Message")
+    for fname in args.files:
+        if os.path.isfile(fname):    
+            start = time.time()
+            n = Nude(fname)
+            n.parse()
+            totaltime = int(math.ceil(time.time() - start))
+            if args.verbose:
+                msg = n.message
+                print(fname, n.result, totaltime, msg, sep=', ')
+            else:
+                print(fname, n.result, sep = "\t")
+        else:
+            print(fname, "is not a file")
     return 0
 
 if __name__ == "__main__":
