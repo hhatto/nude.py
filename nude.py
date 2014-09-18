@@ -43,6 +43,7 @@ class Nude(object):
     def resize(self, maxwidth=1000, maxheight=1000):
         """
         Will resize the image proportionately based on maxwidth and maxheight.
+        NOTE: This may effect the result of the detection algorithm.
         
         Return value is 0 if no change was made, 1 if the image was changed
         based on width, 2 if the image was changed based on height, 3 if it
