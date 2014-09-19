@@ -57,11 +57,11 @@ if __name__ == '__main__':
 	notnudepath = os.path.join('samples', 'not_nude')
 	for nudepic in os.listdir(nudepath):
 		fname = os.path.join(nudepath, nudepic)
-		result = pool.apply_async(testfile, (fname, ), {'resize':args.resize}, nudecallback)
+		pool.apply_async(testfile, (fname, ), {'resize':args.resize}, nudecallback)
 		
 	for notnudepic in os.listdir(notnudepath):
 		fname = os.path.join(notnudepath, notnudepic)
-		result =pool.apply_async(testfile, (fname, ), {'resize':args.resize}, notnudecallback)
+		pool.apply_async(testfile, (fname, ), {'resize':args.resize}, notnudecallback)
 
 	pool.close()
 	pool.join()
