@@ -6,6 +6,7 @@ from __future__ import (absolute_import, division,
 
 import copy
 import sys
+import time
 from collections import namedtuple
 
 try:
@@ -329,36 +330,51 @@ class Nude(object):
 
 ##############################################################################
 
-def main():
+if __name__ == "__main__":
     import argparse
     import os
-    import time
     import math
+    import multiprocessing
+
+    def _testfile(fname, resize=False):
+        start = time.time()
+        n = Nude(fname)
+        if resize:
+            n.resize(maxheight=800, maxwidth=600)
+        n.parse()
+        totaltime = int(math.ceil(time.time() - start))
+        size = str(n.height) + 'x' + str(n.width)
+        return (fname, n.result, totaltime, size, n.message)
+
+    def _poolcallback(results):
+        fname, result, totaltime, size, message = results
+        if args.verbose:
+            print(fname, result, totaltime, size, message, sep=', ')
+        else:
+            print(fname, result, sep = "\t")
+
     parser = argparse.ArgumentParser(description='Detect nudity in images.')
     parser.add_argument('files', metavar='image', nargs='+',
                         help='Images you wish to test')
     parser.add_argument('-r', '--resize', action='store_true', help='Reduce image size to increase speed of scanning')
+    parser.add_argument('-t', '--threads', metavar='int', type=int, required=False, default=0, help='The number of threads to start.')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
 
+    if args.threads < 1:
+        args.threads = multiprocessing.cpu_count()
+    if len(args.files) < args.threads:
+        args.threads = len(args.files)
+
     if args.verbose:
         print("#File Name, Result, Scan Time(sec), Image size, Message")
+
+    pool = multiprocessing.Pool(args.threads)
     for fname in args.files:
         if os.path.isfile(fname):    
-            start = time.time()
-            n = Nude(fname)
-            if args.resize:
-                n.resize(maxheight=800, maxwidth=600)
-            n.parse()
-            totaltime = int(math.ceil(time.time() - start))
-            if args.verbose:
-                size = str(n.height) + 'x' + str(n.width)
-                print(fname, n.result, totaltime, size, n.message, sep=', ')
-            else:
-                print(fname, n.result, sep = "\t")
+            pool.apply_async(_testfile, (fname, ), {'resize':args.resize}, _poolcallback)
         else:
             print(fname, "is not a file")
-    return 0
-
-if __name__ == "__main__":
-    sys.exit(main())
+    pool.close()
+    pool.join()
+    sys.exit(0)
