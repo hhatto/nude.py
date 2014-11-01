@@ -32,6 +32,14 @@ class Nude(object):
             self.image = path_or_io
         else:
             self.image = Image.open(path_or_io)
+        bands = self.image.getbands()
+        # convert greyscale to rgb
+        if len(bands) == 1:
+            new_img = Image.new("RGB", self.image.size)
+            new_img.paste(self.image)
+            f = self.image.filename
+            self.image = new_img
+            self.image.filename = f
         self.skin_map = []
         self.skin_regions = []
         self.detected_regions = []
