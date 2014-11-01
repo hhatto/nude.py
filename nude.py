@@ -46,12 +46,12 @@ class Nude(object):
         if self.result:
             return self
 
+        pixels = self.image.load()
         for y in range(self.height):
             for x in range(self.width):
-                pixel = self.image.getpixel((x, y))
-                r = pixel[0]   # red
-                g = pixel[1]   # green
-                b = pixel[2]   # blue
+                r = pixels[x, y][0]   # red
+                g = pixels[x, y][1]   # green
+                b = pixels[x, y][2]   # blue
                 _id = x + y * self.width + 1
 
                 if not self._classify_skin(r, g, b):
