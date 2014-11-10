@@ -391,7 +391,6 @@ if __name__ == "__main__":
             for t in threadlist:
                 t.wait()
         except KeyboardInterrupt:
-            print(jhgfjhgj)
             pool.terminate()
             pool.join()
     #Run without multiprocessing
