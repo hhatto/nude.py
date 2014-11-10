@@ -370,19 +370,34 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.threads < 1:
-        args.threads = multiprocessing.cpu_count()
+        args.threads = 0
     if len(args.files) < args.threads:
         args.threads = len(args.files)
 
     if args.verbose:
         print("#File Name, Result, Scan Time(sec), Image size, Message")
 
-    pool = multiprocessing.Pool(args.threads)
-    for fname in args.files:
-        if os.path.isfile(fname):    
-            pool.apply_async(_testfile, (fname, ), {'resize':args.resize}, _poolcallback)
-        else:
-            print(fname, "is not a file")
-    pool.close()
-    pool.join()
-    sys.exit(0)
+    #If the user tuned on multi processing
+    if(args.threads):
+        threadlist = []
+        pool = multiprocessing.Pool(args.threads)
+        for fname in args.files:
+            if os.path.isfile(fname):
+                threadlist.append(pool.apply_async(_testfile, (fname, ), {'resize':args.resize}, _poolcallback))
+            else:
+                print(fname, "is not a file")
+        pool.close()
+        try:
+            for t in threadlist:
+                t.wait()
+        except KeyboardInterrupt:
+            print(jhgfjhgj)
+            pool.terminate()
+            pool.join()
+    #Run without multiprocessing
+    else:
+        for fname in args.files:
+            if os.path.isfile(fname):
+                _poolcallback(_testfile(fname, resize=args.resize))
+            else:
+                print(fname, "is not a file")
