@@ -5,7 +5,9 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 import copy
+import math
 import sys
+import time
 from collections import namedtuple
 
 try:
@@ -17,11 +19,9 @@ except ImportError:
         sys.stderr.write("Please install PIL or Pillow\n")
         sys.exit(1)
 
-
 def is_nude(path_or_io):
     nude = Nude(path_or_io)
     return nude.parse().result
-
 
 class Nude(object):
 
@@ -50,6 +50,42 @@ class Nude(object):
         self.width, self.height = self.image.size
         self.total_pixels = self.width * self.height
 
+    def resize(self, maxwidth=1000, maxheight=1000):
+        """
+        Will resize the image proportionately based on maxwidth and maxheight.
+        NOTE: This may effect the result of the detection algorithm.
+        
+        Return value is 0 if no change was made, 1 if the image was changed
+        based on width, 2 if the image was changed based on height, 3 if it
+        was changed on both
+        
+        maxwidth - The max size for the width of the picture
+        maxheight - The max size for the height of the picture
+        Both can be set to False to ignore
+        """
+        ret = 0
+        if maxwidth:
+            if self.width > maxwidth:
+                wpercent = (maxwidth/float(self.width))
+                hsize = int((float(self.height)*float(wpercent)))
+                fname = self.image.filename
+                self.image = self.image.resize((maxwidth, hsize), Image.ANTIALIAS)
+                self.image.filename = fname
+                self.width, self.height = self.image.size
+                self.total_pixels = self.width * self.height
+                ret += 1
+        if maxheight:
+            if self.height > maxheight:
+                hpercent = (maxheight/float(self.height))
+                wsize = int((float(self.width)*float(hpercent)))
+                fname = self.image.filename
+                self.image = self.image.resize((wsize, maxheight), Image.ANTIALIAS)
+                self.image.filename = fname
+                self.width, self.height = self.image.size
+                self.total_pixels = self.width * self.height
+                ret += 2
+        return ret
+        
     def parse(self):
         if self.result:
             return self
@@ -198,7 +234,7 @@ class Nude(object):
         # check if there are more than 15% skin pixel in the image
         if total_skin / self.total_pixels * 100 < 15:
             # if the percentage lower than 15, it's not nude!
-            self.message = "Total skin parcentage lower than 15 (%.3f%%)" % (total_skin / self.total_pixels * 100)
+            self.message = "Total skin percentage lower than 15 (%.3f%%)" % (total_skin / self.total_pixels * 100)
             self.result = False
             return self.result
 
@@ -263,7 +299,7 @@ class Nude(object):
             s > 0.23 and \
             s < 0.68
 
-        # ycc doesnt work
+        # ycc doesn't work
         return rgb_classifier or norm_rgb_classifier or hsv_classifier
 
     def _to_normalized_rgb(self, r, g, b):
@@ -303,19 +339,73 @@ class Nude(object):
 
 ##############################################################################
 
+def _testfile(fname, resize=False):
+    start = time.time()
+    n = Nude(fname)
+    if resize:
+        n.resize(maxheight=800, maxwidth=600)
+    n.parse()
+    totaltime = int(math.ceil(time.time() - start))
+    size = str(n.height) + 'x' + str(n.width)
+    return (fname, n.result, totaltime, size, n.message)
+
+def _poolcallback(results):
+    fname, result, totaltime, size, message = results
+    print(fname, result, sep = "\t")
+
+def _poolcallbackverbose(results):
+    fname, result, totaltime, size, message = results
+    print(fname, result, totaltime, size, message, sep=', ')
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: {0} <image>".format(sys.argv[0]))
-        return 1
-    # else
-    fname = sys.argv[1]
-    print(is_nude(fname))
+    """
+    Command line interface
+    """
+    import argparse
+    import os
+    import multiprocessing
 
-    n = Nude(fname)
-    n.parse()
-    print("{0}: {1} {2}".format(fname, n.result, n.inspect()))
-    return 0
+    parser = argparse.ArgumentParser(description='Detect nudity in images.')
+    parser.add_argument('files', metavar='image', nargs='+',
+                        help='Images you wish to test')
+    parser.add_argument('-r', '--resize', action='store_true', help='Reduce image size to increase speed of scanning')
+    parser.add_argument('-t', '--threads', metavar='int', type=int, required=False, default=0, help='The number of threads to start.')
+    parser.add_argument('-v', '--verbose', action='store_true')
+    args = parser.parse_args()
+
+    if args.threads <= 1:
+        args.threads = 0
+    if len(args.files) < args.threads:
+        args.threads = len(args.files)
+
+    callback = _poolcallback
+    if args.verbose:
+        print("#File Name, Result, Scan Time(sec), Image size, Message")
+        callback = _poolcallbackverbose
+
+    #If the user tuned on multi processing
+    if(args.threads):
+        threadlist = []
+        pool = multiprocessing.Pool(args.threads)
+        for fname in args.files:
+            if os.path.isfile(fname):
+                threadlist.append(pool.apply_async(_testfile, (fname, ), {'resize':args.resize}, callback))
+            else:
+                print(fname, "is not a file")
+        pool.close()
+        try:
+            for t in threadlist:
+                t.wait()
+        except KeyboardInterrupt:
+            pool.terminate()
+            pool.join()
+    #Run without multiprocessing
+    else:
+        for fname in args.files:
+            if os.path.isfile(fname):
+                callback(_testfile(fname, resize=args.resize))
+            else:
+                print(fname, "is not a file")
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
