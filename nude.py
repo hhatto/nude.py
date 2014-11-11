@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 import copy
+import math
 import sys
 import time
 from collections import namedtuple
@@ -338,28 +339,31 @@ class Nude(object):
 
 ##############################################################################
 
-if __name__ == "__main__":
+def _testfile(fname, resize=False):
+    start = time.time()
+    n = Nude(fname)
+    if resize:
+        n.resize(maxheight=800, maxwidth=600)
+    n.parse()
+    totaltime = int(math.ceil(time.time() - start))
+    size = str(n.height) + 'x' + str(n.width)
+    return (fname, n.result, totaltime, size, n.message)
+
+def _poolcallback(results):
+    fname, result, totaltime, size, message = results
+    print(fname, result, sep = "\t")
+
+def _poolcallbackverbose(results):
+    fname, result, totaltime, size, message = results
+    print(fname, result, totaltime, size, message, sep=', ')
+
+def main():
+    """
+    Command line interface
+    """
     import argparse
     import os
-    import math
     import multiprocessing
-
-    def _testfile(fname, resize=False):
-        start = time.time()
-        n = Nude(fname)
-        if resize:
-            n.resize(maxheight=800, maxwidth=600)
-        n.parse()
-        totaltime = int(math.ceil(time.time() - start))
-        size = str(n.height) + 'x' + str(n.width)
-        return (fname, n.result, totaltime, size, n.message)
-
-    def _poolcallback(results):
-        fname, result, totaltime, size, message = results
-        if args.verbose:
-            print(fname, result, totaltime, size, message, sep=', ')
-        else:
-            print(fname, result, sep = "\t")
 
     parser = argparse.ArgumentParser(description='Detect nudity in images.')
     parser.add_argument('files', metavar='image', nargs='+',
@@ -369,13 +373,15 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
 
-    if args.threads < 1:
+    if args.threads <= 1:
         args.threads = 0
     if len(args.files) < args.threads:
         args.threads = len(args.files)
 
+    callback = _poolcallback
     if args.verbose:
         print("#File Name, Result, Scan Time(sec), Image size, Message")
+        callback = _poolcallbackverbose
 
     #If the user tuned on multi processing
     if(args.threads):
@@ -383,7 +389,7 @@ if __name__ == "__main__":
         pool = multiprocessing.Pool(args.threads)
         for fname in args.files:
             if os.path.isfile(fname):
-                threadlist.append(pool.apply_async(_testfile, (fname, ), {'resize':args.resize}, _poolcallback))
+                threadlist.append(pool.apply_async(_testfile, (fname, ), {'resize':args.resize}, callback))
             else:
                 print(fname, "is not a file")
         pool.close()
@@ -397,6 +403,9 @@ if __name__ == "__main__":
     else:
         for fname in args.files:
             if os.path.isfile(fname):
-                _poolcallback(_testfile(fname, resize=args.resize))
+                callback(_testfile(fname, resize=args.resize))
             else:
                 print(fname, "is not a file")
+
+if __name__ == "__main__":
+    main()
