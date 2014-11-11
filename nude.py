@@ -225,8 +225,8 @@ class Nude(object):
             return self.result
 
         # sort the skin regions
-        self.skin_regions = sorted(self.skin_regions, key=lambda s: len(s))
-        self.skin_regions.reverse()
+        self.skin_regions = sorted(self.skin_regions, key=lambda s: len(s),
+                                   reverse=True)
 
         # count total skin pixels
         total_skin = float(sum([len(skin_region) for skin_region in self.skin_regions]))
