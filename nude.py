@@ -19,9 +19,11 @@ except ImportError:
         sys.stderr.write("Please install PIL or Pillow\n")
         sys.exit(1)
 
+
 def is_nude(path_or_io):
     nude = Nude(path_or_io)
     return nude.parse().result
+
 
 class Nude(object):
 
@@ -54,11 +56,11 @@ class Nude(object):
         """
         Will resize the image proportionately based on maxwidth and maxheight.
         NOTE: This may effect the result of the detection algorithm.
-        
+
         Return value is 0 if no change was made, 1 if the image was changed
         based on width, 2 if the image was changed based on height, 3 if it
         was changed on both
-        
+
         maxwidth - The max size for the width of the picture
         maxheight - The max size for the height of the picture
         Both can be set to False to ignore
@@ -66,8 +68,8 @@ class Nude(object):
         ret = 0
         if maxwidth:
             if self.width > maxwidth:
-                wpercent = (maxwidth/float(self.width))
-                hsize = int((float(self.height)*float(wpercent)))
+                wpercent = (maxwidth / float(self.width))
+                hsize = int((float(self.height) * float(wpercent)))
                 fname = self.image.filename
                 self.image = self.image.resize((maxwidth, hsize), Image.ANTIALIAS)
                 self.image.filename = fname
@@ -76,8 +78,8 @@ class Nude(object):
                 ret += 1
         if maxheight:
             if self.height > maxheight:
-                hpercent = (maxheight/float(self.height))
-                wsize = int((float(self.width)*float(hpercent)))
+                hpercent = (maxheight / float(self.height))
+                wsize = int((float(self.width) * float(hpercent)))
                 fname = self.image.filename
                 self.image = self.image.resize((wsize, maxheight), Image.ANTIALIAS)
                 self.image.filename = fname
@@ -85,7 +87,7 @@ class Nude(object):
                 self.total_pixels = self.width * self.height
                 ret += 2
         return ret
-        
+
     def parse(self):
         if self.result:
             return self
@@ -337,7 +339,6 @@ class Nude(object):
 
         return [h, 1.0 - (3.0 * (_min / _sum)), (1.0 / 3.0) * _max]
 
-##############################################################################
 
 def _testfile(fname, resize=False):
     start = time.time()
@@ -349,13 +350,16 @@ def _testfile(fname, resize=False):
     size = str(n.height) + 'x' + str(n.width)
     return (fname, n.result, totaltime, size, n.message)
 
+
 def _poolcallback(results):
     fname, result, totaltime, size, message = results
-    print(fname, result, sep = "\t")
+    print(fname, result, sep="\t")
+
 
 def _poolcallbackverbose(results):
     fname, result, totaltime, size, message = results
     print(fname, result, totaltime, size, message, sep=', ')
+
 
 def main():
     """
@@ -383,13 +387,13 @@ def main():
         print("#File Name, Result, Scan Time(sec), Image size, Message")
         callback = _poolcallbackverbose
 
-    #If the user tuned on multi processing
+    # If the user tuned on multi processing
     if(args.threads):
         threadlist = []
         pool = multiprocessing.Pool(args.threads)
         for fname in args.files:
             if os.path.isfile(fname):
-                threadlist.append(pool.apply_async(_testfile, (fname, ), {'resize':args.resize}, callback))
+                threadlist.append(pool.apply_async(_testfile, (fname, ), {'resize': args.resize}, callback))
             else:
                 print(fname, "is not a file")
         pool.close()
@@ -399,7 +403,7 @@ def main():
         except KeyboardInterrupt:
             pool.terminate()
             pool.join()
-    #Run without multiprocessing
+    # Run without multiprocessing
     else:
         for fname in args.files:
             if os.path.isfile(fname):
