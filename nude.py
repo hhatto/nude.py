@@ -292,10 +292,12 @@ class Nude(object):
             r > g and \
             r > b
 
-        nr, ng, nb = self._to_normalized_rgb(r, g, b)
+        nr, ng, nb = self._to_normalized(r, g, b)
         norm_rgb_classifier = nr / ng > 1.185 and \
             float(r * b) / ((r + g + b) ** 2) > 0.107 and \
             float(r * g) / ((r + g + b) ** 2) > 0.112
+
+        #TODO: Add normalized HSI, HSV, and a few non-parametric skin models too
 
         h, s, v = self._to_hsv(r, g, b)
         hsv_classifier = h > 0 and \
@@ -303,10 +305,21 @@ class Nude(object):
             s > 0.23 and \
             s < 0.68
 
+        nh, ns, nv = self._to_normalized(h, s, v)
+        #norm_hsv_classifier =
         # ycc doesn't work
         return rgb_classifier or norm_rgb_classifier or hsv_classifier
+    def _to_normalized_hsv(self, h, s, v):
+        if h == 0:
+            h = 0.0001
+        if s == 0:
+            s = 0.0001
+        if v == 0:
+            v = 0.0001
+        _sum = float(h + s + v)
+        return [h / 360.0, s / 100.0, v / 100.0]
 
-    def _to_normalized_rgb(self, r, g, b):
+    def _to_normalized(self, r, g, b):
         if r == 0:
             r = 0.0001
         if g == 0:
