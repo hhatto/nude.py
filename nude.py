@@ -24,8 +24,10 @@ class Nude(object):
     def __init__(self, path_or_io):
         if isinstance(path_or_io, Image.Image):
             self.image = path_or_io
-        else:
+        elif isinstance(file, type(path_or_io)):
             self.image = Image.open(path_or_io)
+        else:
+            self.image = path_or_io
         bands = self.image.getbands()
         # convert greyscale to rgb
         if len(bands) == 1:
@@ -287,10 +289,12 @@ class Nude(object):
             r > g and \
             r > b
 
-        nr, ng, nb = self._to_normalized_rgb(r, g, b)
+        nr, ng, nb = self._to_normalized(r, g, b)
         norm_rgb_classifier = nr / ng > 1.185 and \
             float(r * b) / ((r + g + b) ** 2) > 0.107 and \
             float(r * g) / ((r + g + b) ** 2) > 0.112
+
+        #TODO: Add normalized HSI, HSV, and a few non-parametric skin models too
 
         h, s, v = self._to_hsv(r, g, b)
         hsv_classifier = h > 0 and \
@@ -298,10 +302,26 @@ class Nude(object):
             s > 0.23 and \
             s < 0.68
 
-        # ycc doesn't work
-        return rgb_classifier or norm_rgb_classifier or hsv_classifier
+        y, cb, cr = self._to_ycbcr(r, g,  b)
+        # Based on this paper http://research.ijcaonline.org/volume94/number6/pxc3895695.pdf
+        ycbcr_classifier = 97.5 <= cb <= 142.5 and \
+                                134 <= cr <= 176
 
-    def _to_normalized_rgb(self, r, g, b):
+        nh, ns, nv = self._to_normalized(h, s, v)
+        #norm_hsv_classifier =
+        # ycc doesn't work
+        return rgb_classifier or norm_rgb_classifier or hsv_classifier or ycbcr_classifier
+    def _to_normalized_hsv(self, h, s, v):
+        if h == 0:
+            h = 0.0001
+        if s == 0:
+            s = 0.0001
+        if v == 0:
+            v = 0.0001
+        _sum = float(h + s + v)
+        return [h / 360.0, s / 100.0, v / 100.0]
+
+    def _to_normalized(self, r, g, b):
         if r == 0:
             r = 0.0001
         if g == 0:
@@ -310,6 +330,13 @@ class Nude(object):
             b = 0.0001
         _sum = float(r + g + b)
         return [r / _sum, g / _sum, b / _sum]
+
+    def _to_ycbcr(self, r, g, b):
+        # Copied from here. http://stackoverflow.com/questions/19459831/rgb-to-ycbcr-conversion-problems
+        y = .299*r + .587*g + .114*b
+        cb = 128 -.168736*r -.331364*g + .5*b
+        cr = 128 +.5*r - .418688*g - .081312*b
+        return y, cb, cr
 
     def _to_hsv(self, r, g, b):
         h = 0
