@@ -149,7 +149,8 @@ class Nude(object):
         _nude_class = "{_module}.{_class}:{_addr}".format(_module=self.__class__.__module__,
                                                           _class=self.__class__.__name__,
                                                           _addr=hex(id(self)))
-        _image = "'%s' '%s' '%dx%d'" % (self.image.filename, self.image.format, self.width, self.height)
+        _image = "'%s' '%s' '%dx%d'" % (
+            self.image.filename, self.image.format, self.width, self.height)
         return "#<{_nude_class}({_image}): result={_result} message='{_message}'>".format(
             _nude_class=_nude_class, _image=_image, _result=self.result, _message=self.message)
 
@@ -236,7 +237,8 @@ class Nude(object):
         # check if there are more than 15% skin pixel in the image
         if total_skin / self.total_pixels * 100 < 15:
             # if the percentage lower than 15, it's not nude!
-            self.message = "Total skin percentage lower than 15 (%.3f%%)" % (total_skin / self.total_pixels * 100)
+            self.message = "Total skin percentage lower than 15 (%.3f%%)" % (
+                total_skin / self.total_pixels * 100)
             self.result = False
             return self.result
 
@@ -250,25 +252,28 @@ class Nude(object):
             self.result = False
             return self.result
 
-        # check if the number of skin pixels in the largest region is less than 45% of the total skin count
+        # check if the number of skin pixels in the largest region is
+        # less than 45% of the total skin count
         if len(self.skin_regions[0]) / total_skin * 100 < 45:
-            self.message = "The biggest region contains less than 45 (%.3f%%)" % (len(self.skin_regions[0]) / total_skin * 100)
+            self.message = "The biggest region contains less than 45 (%.3f%%)" % (
+                len(self.skin_regions[0]) / total_skin * 100)
             self.result = False
             return self.result
 
         # TODO:
         # build the bounding polygon by the regions edge values:
-        # Identify the leftmost, the uppermost, the rightmost, and the lowermost skin pixels of the three largest skin regions.
+        # Identify the leftmost, the uppermost, the rightmost, and the lowermost
+        # skin pixels of the three largest skin regions.
         # Use these points as the corner points of a bounding polygon.
 
         # TODO:
         # check if the total skin count is less than 30% of the total number of pixels
-        # AND the number of skin pixels within the bounding polygon is less than 55% of the size of the polygon
-        # if this condition is True, it's not nude.
+        # AND the number of skin pixels within the bounding polygon is
+        # less than 55% of the size of the polygon if this condition is True, it's not nude.
 
         # TODO: include bounding polygon functionality
-        # if there are more than 60 skin regions and the average intensity within the polygon is less than 0.25
-        # the image is not nude
+        # if there are more than 60 skin regions and the average intensity
+        # within the polygon is less than 0.25 the image is not nude
         if len(self.skin_regions) > 60:
             self.message = "More than 60 skin regions ({_skin_regions_size})".format(
                 _skin_regions_size=len(self.skin_regions))
@@ -372,8 +377,10 @@ def main():
     parser = argparse.ArgumentParser(description='Detect nudity in images.')
     parser.add_argument('files', metavar='image', nargs='+',
                         help='Images you wish to test')
-    parser.add_argument('-r', '--resize', action='store_true', help='Reduce image size to increase speed of scanning')
-    parser.add_argument('-t', '--threads', metavar='int', type=int, required=False, default=0, help='The number of threads to start.')
+    parser.add_argument('-r', '--resize', action='store_true',
+                        help='Reduce image size to increase speed of scanning')
+    parser.add_argument('-t', '--threads', metavar='int', type=int, required=False, default=0,
+                        help='The number of threads to start.')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
 
@@ -393,7 +400,8 @@ def main():
         pool = multiprocessing.Pool(args.threads)
         for fname in args.files:
             if os.path.isfile(fname):
-                threadlist.append(pool.apply_async(_testfile, (fname, ), {'resize': args.resize}, callback))
+                threadlist.append(pool.apply_async(_testfile, (fname, ),
+                                  {'resize': args.resize}, callback))
             else:
                 print(fname, "is not a file")
         pool.close()
