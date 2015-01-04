@@ -30,7 +30,7 @@ class Nude(object):
     Skin = namedtuple("Skin", "id skin region x y checked")
 
     def __init__(self, path_or_io):
-        if isinstance(Image, type(path_or_io)):
+        if isinstance(path_or_io, Image.Image):
             self.image = path_or_io
         else:
             self.image = Image.open(path_or_io)
