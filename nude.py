@@ -9,15 +9,7 @@ import math
 import sys
 import time
 from collections import namedtuple
-
-try:
-    import Image
-except ImportError:
-    try:
-        from PIL import Image
-    except ImportError:
-        sys.stderr.write("Please install PIL or Pillow\n")
-        sys.exit(1)
+from PIL import Image
 
 
 def is_nude(path_or_io):
