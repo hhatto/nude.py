@@ -1,5 +1,6 @@
+from __future__ import print_function
+
 import os
-import nude
 from nude import Nude
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
