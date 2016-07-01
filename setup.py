@@ -2,6 +2,7 @@ try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
+from Cython.Build import cythonize
 
 
 setup(name='nudepy',
@@ -23,6 +24,7 @@ setup(name='nudepy',
           'Programming Language :: Python :: 3'],
       keywords="nude",
       zip_safe=False,
-      install_requires=['pillow'],
+      install_requires=['pillow', 'Cython'],
       entry_points={'console_scripts': ['nudepy = nude:main']},
+      ext_modules=cythonize("skin_classifier.pyx"),
       )
