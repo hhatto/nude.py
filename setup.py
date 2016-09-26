@@ -1,9 +1,24 @@
 try:
-    from setuptools import setup
+    from setuptools import setup, Extension
 except ImportError:
-    from distutils.core import setup
-from Cython.Build import cythonize
+    from distutils.core import setup, Extension
+try:
+    from Cython.Distutils import build_ext
+    USE_CYTHON = True
+except ImportError:
+    USE_CYTHON = False
 
+if USE_CYTHON:
+    ext = '.pyx'
+    cmdclass = {'build_ext': build_ext}
+else:
+    ext = '.c'
+    cmdclass = {}
+
+ext_modules = [Extension(
+    'skin_classifier',
+    sources=['skin_classifier' + ext]
+)]
 
 setup(name='nudepy',
       version='0.3',
@@ -24,7 +39,8 @@ setup(name='nudepy',
           'Programming Language :: Python :: 3'],
       keywords="nude",
       zip_safe=False,
-      install_requires=['pillow', 'Cython'],
+      install_requires=['pillow'],
       entry_points={'console_scripts': ['nudepy = nude:main']},
-      ext_modules=cythonize("skin_classifier.pyx"),
+      ext_modules=ext_modules,
+      cmdclass=cmdclass,
       )
