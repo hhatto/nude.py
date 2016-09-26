@@ -22,6 +22,7 @@ from easy_install::
 Requirements
 ------------
 * Python2.7+ and Python3.3+
+* Cython
 * Pillow
 
 
