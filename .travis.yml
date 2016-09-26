@@ -11,5 +11,8 @@ install:
     - pip install --upgrade cython
     - pip install --upgrade .
 
+script:
+    - cd tests && python trial.py
+
 notifications:
     email: false
