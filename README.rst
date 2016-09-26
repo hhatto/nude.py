@@ -1,6 +1,10 @@
 nude.py
 =======
 
+.. image:: https://travis-ci.org/hhatto/nude.py.svg?branch=master
+    :target: https://travis-ci.org/hhatto/nude.py
+    :alt: Build status
+
 About
 -----
 Nudity detection with Python. Port of `nude.js`_ to Python.
