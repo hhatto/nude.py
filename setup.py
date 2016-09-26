@@ -6,7 +6,7 @@ from Cython.Build import cythonize
 
 
 setup(name='nudepy',
-      version='0.2',
+      version='0.3',
       description="Nudity detection with Python. Port of nude.js to Python.",
       long_description=open('README.rst').read(),
       author='Hideo Hattori',
