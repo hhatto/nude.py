@@ -19,7 +19,10 @@ def is_nude(path_or_io):
 class Nude(object):
 
     def __init__(self, path_or_io):
-        self.image = Image.open(path_or_io)
+        if isinstance(path_or_io, (str, file)):
+            self.image = Image.open(path_or_io)
+        else:
+            self.image = path_or_io
         bands = self.image.getbands()
         # convert greyscale to rgb
         if len(bands) == 1:
@@ -277,7 +280,6 @@ class Nude(object):
         if skin_classifier(r, g, b):
             return True
         return False
-
 
 
 def _testfile(fname, resize=False):
