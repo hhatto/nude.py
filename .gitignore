@@ -10,3 +10,5 @@
 __pycache__
 build
 dist
+skin_classifier.c
+skin_classifier.so
