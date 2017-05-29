@@ -7,6 +7,7 @@ from __future__ import (absolute_import, division,
 import copy
 import math
 import time
+from io import IOBase
 from PIL import Image
 from skin_classifier import skin_classifier, Skin
 
@@ -19,10 +20,10 @@ def is_nude(path_or_io):
 class Nude(object):
 
     def __init__(self, path_or_io):
-        if isinstance(path_or_io, (str, file)):
-            self.image = Image.open(path_or_io)
-        else:
+        if isinstance(path_or_io, IOBase):
             self.image = path_or_io
+        else:
+            self.image = Image.open(path_or_io)
         bands = self.image.getbands()
         # convert greyscale to rgb
         if len(bands) == 1:
