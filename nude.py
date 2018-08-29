@@ -19,11 +19,11 @@ def is_nude(path_or_io):
 
 class Nude(object):
 
-    def __init__(self, path_or_io):
-        if isinstance(path_or_io, IOBase):
-            self.image = path_or_io
+    def __init__(self, path_or_io_or_image):
+        if isinstance(path_or_io_or_image, (str, IOBase)):
+            self.image = Image.open(path_or_io_or_image)
         else:
-            self.image = Image.open(path_or_io)
+            self.image = path_or_io_or_image
         bands = self.image.getbands()
         # convert greyscale to rgb
         if len(bands) == 1:
