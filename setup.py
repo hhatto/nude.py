@@ -21,7 +21,7 @@ ext_modules = [Extension(
 )]
 
 setup(name='nudepy',
-      version='0.5',
+      version='0.5.1',
       description="Nudity detection with Python. Port of nude.js to Python.",
       long_description=open('README.rst').read(),
       author='Hideo Hattori',
